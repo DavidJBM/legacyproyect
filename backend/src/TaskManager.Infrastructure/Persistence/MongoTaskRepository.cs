@@ -16,6 +16,11 @@ public class MongoTaskRepository : ITaskRepository
         var client = new MongoClient(settings.ConnectionString);
         var database = client.GetDatabase(settings.DatabaseName);
         _collection = database.GetCollection<TaskItem>("tasks");
+
+        // Crear índices para búsquedas frecuentes
+        var projectIdIndex = new CreateIndexModel<TaskItem>(Builders<TaskItem>.IndexKeys.Ascending(t => t.ProjectId));
+        var assignedToIndex = new CreateIndexModel<TaskItem>(Builders<TaskItem>.IndexKeys.Ascending(t => t.AssignedToUserId));
+        _collection.Indexes.CreateMany(new[] { projectIdIndex, assignedToIndex });
     }
 
     public async Task<IReadOnlyList<TaskItem>> GetAllAsync(CancellationToken cancellationToken = default)

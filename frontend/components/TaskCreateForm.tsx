@@ -6,13 +6,14 @@ import type { CreateTaskRequest } from "@/types/task";
 
 interface TaskCreateFormProps {
   onCreated: () => void;
+  currentUserId: string;
 }
 
 /**
  * Componente separado para el formulario de creación de tareas.
  * Equivalente conceptual al formulario "Nueva/Editar Tarea" + addTask() en app.js / index.html.
  */
-export function TaskCreateForm({ onCreated }: TaskCreateFormProps) {
+export function TaskCreateForm({ onCreated, currentUserId }: TaskCreateFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("Pendiente");
@@ -38,6 +39,7 @@ export function TaskCreateForm({ onCreated }: TaskCreateFormProps) {
         priority,
         dueDate: dueDate || undefined,
         estimatedHours: estimatedHours ? parseFloat(estimatedHours) : 0,
+        createdByUserId: currentUserId,
       };
       await createTask(request);
       setTitle("");

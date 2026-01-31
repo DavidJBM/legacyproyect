@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Application.Interfaces;
 using System.Text;
@@ -5,6 +6,7 @@ using System.Text;
 namespace TaskManager.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class ReportsController : ControllerBase
 {

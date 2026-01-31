@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardTabs, type TabId } from "@/components/DashboardTabs";
 import { TaskList } from "@/components/TaskList";
 import { TaskCreateForm } from "@/components/TaskCreateForm";
@@ -15,9 +16,8 @@ import { getTasks, getProjects } from "@/lib/api";
 import type { TaskItem } from "@/types/task";
 import type { ProjectItem } from "@/types/project";
 
-const CURRENT_USER_ID = "1";
-
 export default function DashboardPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("tasks");
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -25,6 +25,21 @@ export default function DashboardPage() {
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string>("1");
+  const [username, setUsername] = useState<string>("Usuario");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUserId = localStorage.getItem("userId");
+    const storedUsername = localStorage.getItem("username");
+
+    if (!token || !storedUserId) {
+      router.push("/login");
+    } else {
+      setCurrentUserId(storedUserId);
+      setUsername(storedUsername || "Usuario");
+    }
+  }, [router]);
 
   const refreshTasks = async () => {
     setLoadingTasks(true);
@@ -44,7 +59,7 @@ export default function DashboardPage() {
     try {
       const data = await getProjects();
       setProjects(data);
-    } catch (_) {}
+    } catch (_) { }
     finally {
       setLoadingProjects(false);
     }
@@ -85,7 +100,7 @@ export default function DashboardPage() {
             </section>
             <section>
               <h2 className="mb-4 text-lg font-medium text-slate-700">Nueva Tarea</h2>
-              <TaskCreateForm onCreated={refreshTasks} />
+              <TaskCreateForm onCreated={refreshTasks} currentUserId={currentUserId} />
             </section>
           </div>
         )}
@@ -119,7 +134,7 @@ export default function DashboardPage() {
         {activeTab === "comments" && (
           <section>
             <h2 className="mb-4 text-lg font-medium text-slate-700">Comentarios de Tareas</h2>
-            <CommentsSection currentUserId={CURRENT_USER_ID} />
+            <CommentsSection currentUserId={currentUserId} />
           </section>
         )}
 
@@ -133,7 +148,7 @@ export default function DashboardPage() {
         {activeTab === "notifications" && (
           <section>
             <h2 className="mb-4 text-lg font-medium text-slate-700">Notificaciones</h2>
-            <NotificationsSection currentUserId={CURRENT_USER_ID} />
+            <NotificationsSection currentUserId={currentUserId} />
           </section>
         )}
 

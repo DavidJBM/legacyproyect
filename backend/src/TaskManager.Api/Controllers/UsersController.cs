@@ -1,21 +1,32 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskManager.Application.Interfaces;
 
 namespace TaskManager.Api.Controllers;
 
 /// <summary>Usuarios para dropdowns (equivalente a Storage.getUsers() en app.js). Lista fija para demo.</summary>
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private static readonly List<UserDto> Users = new()
+    private readonly IUserRepository _userRepository;
+
+    public UsersController(IUserRepository userRepository)
     {
-        new UserDto { Id = "1", Username = "admin" },
-        new UserDto { Id = "2", Username = "user1" },
-        new UserDto { Id = "3", Username = "user2" }
-    };
+        _userRepository = userRepository;
+    }
 
     [HttpGet]
-    public ActionResult<IReadOnlyList<UserDto>> GetUsers() => Ok(Users);
+    public async Task<ActionResult<IReadOnlyList<UserDto>>> GetUsers()
+    {
+        var users = await _userRepository.GetAllAsync();
+        return Ok(users.Select(u => new UserDto 
+        { 
+            Id = u.Id, 
+            Username = u.Username 
+        }).ToList());
+    }
 }
 
 public class UserDto

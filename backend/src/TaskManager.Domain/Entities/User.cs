@@ -1,11 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TaskManager.Domain.Entities;
 
-/// <summary>
-/// Entidad Usuario (equivalente al objeto user del legacy app.js / localStorage "users").
-/// </summary>
 public class User
 {
-    public string Id { get; set; } = string.Empty;
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    
+    [Required]
     public string Username { get; set; } = string.Empty;
+    
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
     public string PasswordHash { get; set; } = string.Empty;
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

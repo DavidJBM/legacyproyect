@@ -16,6 +16,10 @@ public class MongoProjectRepository : IProjectRepository
         var client = new MongoClient(settings.ConnectionString);
         var database = client.GetDatabase(settings.DatabaseName);
         _collection = database.GetCollection<Project>("projects");
+
+        // Crear índice para el nombre
+        var nameIndex = new CreateIndexModel<Project>(Builders<Project>.IndexKeys.Ascending(p => p.Name));
+        _collection.Indexes.CreateOne(nameIndex);
     }
 
     public async Task<IReadOnlyList<Project>> GetAllAsync(CancellationToken cancellationToken = default)

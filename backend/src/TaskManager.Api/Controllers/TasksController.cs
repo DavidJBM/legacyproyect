@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Application.DTOs;
 using TaskManager.Application.Interfaces;
@@ -9,6 +10,7 @@ namespace TaskManager.Api.Controllers;
 /// Expone la API REST para el frontend Next.js.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class TasksController : ControllerBase
 {

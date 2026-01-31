@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddSingleton<ICommentRepository, MongoCommentRepository>();
         services.AddSingleton<IHistoryRepository, MongoHistoryRepository>();
         services.AddSingleton<INotificationRepository, MongoNotificationRepository>();
+        services.AddSingleton<IUserRepository, MongoUserRepository>();
         return services;
     }
 }

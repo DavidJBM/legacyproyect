@@ -10,13 +10,24 @@ import type { UserItem } from "@/types/user";
 
 const API = typeof window !== "undefined" ? "/api/backend" : "http://localhost:5000/api";
 
+function getHeaders() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 function url(path: string) {
   return `${API}${path}`;
 }
 
 // ——— Tareas ———
 export async function getTasks(): Promise<TaskItem[]> {
-  const res = await fetch(url("/Tasks"), { cache: "no-store" });
+  const res = await fetch(url("/Tasks"), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar tareas");
   return res.json();
 }
@@ -27,7 +38,10 @@ export async function searchTasks(params: { search?: string; status?: string; pr
   if (params.status) q.set("status", params.status);
   if (params.priority) q.set("priority", params.priority);
   if (params.projectId) q.set("projectId", params.projectId);
-  const res = await fetch(url(`/Tasks?${q}`), { cache: "no-store" });
+  const res = await fetch(url(`/Tasks?${q}`), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al buscar tareas");
   return res.json();
 }
@@ -35,7 +49,7 @@ export async function searchTasks(params: { search?: string; status?: string; pr
 export async function createTask(request: CreateTaskRequest): Promise<TaskItem> {
   const res = await fetch(url("/Tasks"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(request),
   });
   if (!res.ok) {
@@ -48,20 +62,26 @@ export async function createTask(request: CreateTaskRequest): Promise<TaskItem> 
 export async function updateTask(id: string, request: CreateTaskRequest): Promise<void> {
   const res = await fetch(url(`/Tasks/${id}`), {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(request),
   });
   if (!res.ok) throw new Error("Error al actualizar tarea");
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  const res = await fetch(url(`/Tasks/${id}`), { method: "DELETE" });
+  const res = await fetch(url(`/Tasks/${id}`), {
+    method: "DELETE",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al eliminar tarea");
 }
 
 // ——— Proyectos ———
 export async function getProjects(): Promise<ProjectItem[]> {
-  const res = await fetch(url("/Projects"), { cache: "no-store" });
+  const res = await fetch(url("/Projects"), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar proyectos");
   return res.json();
 }
@@ -69,7 +89,7 @@ export async function getProjects(): Promise<ProjectItem[]> {
 export async function createProject(request: CreateProjectRequest): Promise<ProjectItem> {
   const res = await fetch(url("/Projects"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(request),
   });
   if (!res.ok) throw new Error("Error al crear proyecto");
@@ -79,20 +99,26 @@ export async function createProject(request: CreateProjectRequest): Promise<Proj
 export async function updateProject(id: string, request: CreateProjectRequest): Promise<void> {
   const res = await fetch(url(`/Projects/${id}`), {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(request),
   });
   if (!res.ok) throw new Error("Error al actualizar proyecto");
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const res = await fetch(url(`/Projects/${id}`), { method: "DELETE" });
+  const res = await fetch(url(`/Projects/${id}`), {
+    method: "DELETE",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al eliminar proyecto");
 }
 
 // ——— Comentarios ———
 export async function getCommentsByTaskId(taskId: string): Promise<CommentItem[]> {
-  const res = await fetch(url(`/Comments/task/${taskId}`), { cache: "no-store" });
+  const res = await fetch(url(`/Comments/task/${taskId}`), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar comentarios");
   return res.json();
 }
@@ -100,7 +126,7 @@ export async function getCommentsByTaskId(taskId: string): Promise<CommentItem[]
 export async function addComment(request: AddCommentRequest): Promise<CommentItem> {
   const res = await fetch(url("/Comments"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders(),
     body: JSON.stringify(request),
   });
   if (!res.ok) throw new Error("Error al agregar comentario");
@@ -109,44 +135,65 @@ export async function addComment(request: AddCommentRequest): Promise<CommentIte
 
 // ——— Historial ———
 export async function getHistoryByTaskId(taskId: string): Promise<HistoryEntryItem[]> {
-  const res = await fetch(url(`/History/task/${taskId}`), { cache: "no-store" });
+  const res = await fetch(url(`/History/task/${taskId}`), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar historial");
   return res.json();
 }
 
 export async function getAllHistory(limit = 100): Promise<HistoryEntryItem[]> {
-  const res = await fetch(url(`/History?limit=${limit}`), { cache: "no-store" });
+  const res = await fetch(url(`/History?limit=${limit}`), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar historial");
   return res.json();
 }
 
 // ——— Notificaciones ———
 export async function getNotificationsByUserId(userId: string, unreadOnly = true): Promise<NotificationItem[]> {
-  const res = await fetch(url(`/Notifications/user/${userId}?unreadOnly=${unreadOnly}`), { cache: "no-store" });
+  const res = await fetch(url(`/Notifications/user/${userId}?unreadOnly=${unreadOnly}`), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar notificaciones");
   return res.json();
 }
 
 export async function markNotificationsRead(userId: string): Promise<void> {
-  const res = await fetch(url(`/Notifications/user/${userId}/mark-read`), { method: "POST" });
+  const res = await fetch(url(`/Notifications/user/${userId}/mark-read`), {
+    method: "POST",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al marcar notificaciones");
 }
 
 // ——— Reportes ———
 export async function getReportTasks(): Promise<Record<string, number>> {
-  const res = await fetch(url("/Reports/tasks"), { cache: "no-store" });
+  const res = await fetch(url("/Reports/tasks"), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar reporte");
   return res.json();
 }
 
 export async function getReportProjects(): Promise<{ projectName: string; taskCount: number }[]> {
-  const res = await fetch(url("/Reports/projects"), { cache: "no-store" });
+  const res = await fetch(url("/Reports/projects"), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar reporte");
   return res.json();
 }
 
 export async function getReportUsers(): Promise<{ userId: string; taskCount: number }[]> {
-  const res = await fetch(url("/Reports/users"), { cache: "no-store" });
+  const res = await fetch(url("/Reports/users"), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar reporte");
   return res.json();
 }
@@ -157,7 +204,10 @@ export function getExportCsvUrl(): string {
 
 // ——— Usuarios ———
 export async function getUsers(): Promise<UserItem[]> {
-  const res = await fetch(url("/Users"), { cache: "no-store" });
+  const res = await fetch(url("/Users"), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
   if (!res.ok) throw new Error("Error al cargar usuarios");
   return res.json();
 }
