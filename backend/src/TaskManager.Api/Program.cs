@@ -84,14 +84,32 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(
-            "http://localhost:3000/",
-        "https://frontend-mkiz.onrender.com/")
+            "http://localhost:3000",
+            "https://frontend-mkiz.onrender.com"
+        )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
+
+// Global Exception Handler for better logging in Railway
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"GLOBAL ERROR: {ex.Message}");
+        Console.WriteLine($"STACK TRACE: {ex.StackTrace}");
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsJsonAsync(new { error = "Internal Server Error", message = ex.Message });
+    }
+});
+
 
 // Seed Database
 using (var scope = app.Services.CreateScope())
