@@ -3,11 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --foreground: #0f172a;
-  --background: #f8fafc;
+  --primary: 139 92 246;
+  --background: 248 250 252;
+  --foreground: 15 23 42;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: rgb(var(--foreground));
+  background: radial-gradient(circle at top left, #f8fafc, #eff6ff);
+  background-attachment: fixed;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.glass-card {
+  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-glass rounded-2xl;
+}
+
+.sidebar-glass {
+  @apply bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 shadow-2xl;
+}
+
+.btn-primary {
+  @apply px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium 
+         hover:bg-primary-700 active:scale-95 transition-all duration-200 
+         shadow-lg shadow-primary-500/20 flex items-center justify-center gap-2;
+}
+
+.input-modern {
+  @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl
+         focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none
+         transition-all duration-200 text-slate-700 placeholder:text-slate-400;
 }

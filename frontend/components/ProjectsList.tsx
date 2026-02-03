@@ -11,6 +11,10 @@ interface ProjectsListProps {
   selectedId: string | null;
 }
 
+import { Trash2, Folder, ChevronRight, Users } from "lucide-react";
+import { clsx } from "clsx";
+import { motion } from "framer-motion";
+
 export function ProjectsList({ projects, onRefresh, onSelect, selectedId }: ProjectsListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -29,45 +33,69 @@ export function ProjectsList({ projects, onRefresh, onSelect, selectedId }: Proj
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-500">
-        No hay proyectos. Crea uno desde el formulario.
+      <div className="glass-card p-12 text-center">
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Folder className="text-slate-400" size={32} />
+        </div>
+        <p className="text-slate-500 font-medium">No hay proyectos activos.</p>
+        <p className="text-slate-400 text-sm mt-1">Comienza creando uno nuevo para organizar tus tareas.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-slate-200">
-        <thead className="bg-slate-50">
-          <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-600">Nombre</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-600">Descripción</th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-600">Acciones</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 bg-white">
-          {projects.map((p) => (
-            <tr
-              key={p.id}
-              onClick={() => onSelect(p)}
-              className={"cursor-pointer transition hover:bg-slate-50 " + (selectedId === p.id ? "bg-primary-50" : "")}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {projects.map((p) => (
+        <motion.div
+          key={p.id}
+          whileHover={{ y: -4 }}
+          onClick={() => onSelect(p)}
+          className={clsx(
+            "glass-card p-6 cursor-pointer border-2 transition-all relative group",
+            selectedId === p.id
+              ? "border-primary-500 ring-4 ring-primary-500/10 shadow-lg"
+              : "border-transparent border-white/20 hover:border-primary-500/30 shadow-premium"
+          )}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <div className={clsx(
+              "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
+              selectedId === p.id ? "bg-primary-500 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-primary-50 group-hover:text-primary-500"
+            )}>
+              <Folder size={24} />
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleDelete(p.id, p.name); }}
+              disabled={deletingId === p.id}
+              className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
             >
-              <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{p.name}</td>
-              <td className="px-4 py-3 text-sm text-slate-500">{p.description || "—"}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-right">
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); handleDelete(p.id, p.name); }}
-                  disabled={deletingId === p.id}
-                  className="text-red-600 hover:bg-red-50 rounded px-2 py-1 text-sm disabled:opacity-50"
-                >
-                  {deletingId === p.id ? "..." : "Eliminar"}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              <Trash2 size={18} />
+            </button>
+          </div>
+
+          <h3 className="text-lg font-bold text-slate-800 mb-1 leading-tight">{p.name}</h3>
+          <p className="text-sm text-slate-500 line-clamp-2 mb-6 min-h-[40px] leading-relaxed">
+            {p.description || "Sin descripción proporcionada."}
+          </p>
+
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100/50">
+            <div className="flex items-center gap-2 text-slate-400 text-xs font-bold">
+              <Users size={14} />
+              <span>EQUIPO</span>
+            </div>
+            <div className="flex items-center gap-1 text-primary-600 text-sm font-bold">
+              Ver detalles
+              <ChevronRight size={16} />
+            </div>
+          </div>
+
+          {selectedId === p.id && (
+            <div className="absolute top-4 right-4 animate-pulse">
+              <div className="w-2 h-2 rounded-full bg-primary-500" />
+            </div>
+          )}
+        </motion.div>
+      ))}
     </div>
   );
 }

@@ -13,6 +13,9 @@ interface TaskListProps {
  * Componente separado para la lista de tareas.
  * Equivalente conceptual a loadTasks() + tbody en app.js / index.html.
  */
+import { Trash2, Edit2, Calendar } from "lucide-react";
+import { clsx } from "clsx";
+
 export function TaskList({ tasks, onRefresh }: TaskListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -29,97 +32,93 @@ export function TaskList({ tasks, onRefresh }: TaskListProps) {
     }
   };
 
-  const statusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      Pendiente: "bg-amber-100 text-amber-800",
-      "En Progreso": "bg-blue-100 text-blue-800",
-      Completada: "bg-emerald-100 text-emerald-800",
-      Bloqueada: "bg-slate-100 text-slate-700",
-      Cancelada: "bg-red-100 text-red-800",
+  const statusStyle = (status: string) => {
+    const map: Record<string, string> = {
+      Nueva: "bg-slate-100 text-slate-600 border-slate-200",
+      "En Progreso": "bg-primary-50 text-primary-700 border-primary-100",
+      Completada: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      Bloqueada: "bg-rose-50 text-rose-700 border-rose-100",
     };
-    return (
-      <span
-        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-          styles[status] ?? "bg-slate-100 text-slate-700"
-        }`}
-      >
-        {status || "Pendiente"}
-      </span>
-    );
+    return map[status] || "bg-slate-50 text-slate-500 border-slate-100";
   };
 
-  const priorityBadge = (priority: string) => {
-    const styles: Record<string, string> = {
-      Baja: "text-slate-600",
-      Media: "text-sky-600",
-      Alta: "text-orange-600",
-      Crítica: "text-red-600 font-medium",
+  const priorityStyle = (priority: string) => {
+    const map: Record<string, string> = {
+      Alta: "text-rose-600",
+      Media: "text-amber-600",
+      Baja: "text-emerald-600",
     };
-    return (
-      <span className={`text-xs ${styles[priority] ?? "text-slate-600"}`}>
-        {priority || "Media"}
-      </span>
-    );
+    return map[priority] || "text-slate-500";
   };
 
   if (tasks.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-        No hay tareas. Crea una desde el formulario.
+      <div className="glass-card p-12 text-center">
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Calendar className="text-slate-400" size={32} />
+        </div>
+        <p className="text-slate-500 font-medium">No se encontraron tareas en esta sección.</p>
+        <p className="text-slate-400 text-sm mt-1">Crea una nueva desde el panel lateral derecho.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="glass-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-600">
-                Título
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-600">
-                Estado
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-600">
-                Prioridad
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-600">
-                Vencimiento
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-600">
-                Acciones
-              </th>
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50/50">
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Título y Descripción</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">Estado</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Prioridad</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Vencimiento</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-slate-100">
             {tasks.map((task) => (
-              <tr
-                key={task.id}
-                className="transition hover:bg-slate-50"
-              >
-                <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
-                  {task.title}
+              <tr key={task.id} className="group hover:bg-slate-50/80 transition-all">
+                <td className="px-6 py-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-800 leading-tight mb-0.5">{task.title}</span>
+                    <span className="text-xs text-slate-500 line-clamp-1">{task.description}</span>
+                  </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm">
-                  {statusBadge(task.status)}
+                <td className="px-6 py-4">
+                  <div className="flex justify-center">
+                    <span className={clsx("px-2.5 py-1 rounded-lg text-[10px] font-bold border", statusStyle(task.status))}>
+                      {task.status || "Pendiente"}
+                    </span>
+                  </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm">
-                  {priorityBadge(task.priority)}
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className={clsx("w-1.5 h-1.5 rounded-full", priorityStyle(task.priority).replace('text', 'bg'))} />
+                    <span className={clsx("text-xs font-semibold", priorityStyle(task.priority))}>
+                      {task.priority || "Media"}
+                    </span>
+                  </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">
-                  {task.dueDate || "—"}
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
+                    <Calendar size={14} className="text-slate-300" />
+                    {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "—"}
+                  </div>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(task.id)}
-                    disabled={deletingId === task.id}
-                    className="rounded text-red-600 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
-                  >
-                    {deletingId === task.id ? "..." : "Eliminar"}
-                  </button>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      disabled={deletingId === task.id}
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
