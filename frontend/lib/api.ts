@@ -8,7 +8,8 @@ import type { HistoryEntryItem } from "@/types/history";
 import type { NotificationItem } from "@/types/notification";
 import type { UserItem } from "@/types/user";
 
-const API = typeof window !== "undefined" ? "/api/backend" : "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" ? "/api/backend" : "http://localhost:5000/api");
+
 
 function getHeaders() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
