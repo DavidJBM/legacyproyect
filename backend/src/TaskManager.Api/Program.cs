@@ -83,10 +83,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:3000",
-            "https://frontend-mkiz.onrender.com"
-        )
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -103,10 +100,15 @@ app.Use(async (context, next) =>
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"GLOBAL ERROR: {ex.Message}");
+        Console.WriteLine($"!!! GLOBAL ERROR !!!: {ex.GetType().Name}: {ex.Message}");
         Console.WriteLine($"STACK TRACE: {ex.StackTrace}");
-        context.Response.StatusCode = 500;
-        await context.Response.WriteAsJsonAsync(new { error = "Internal Server Error", message = ex.Message });
+        
+        if (!context.Response.HasStarted)
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { error = "Internal Server Error", message = ex.Message, type = ex.GetType().Name });
+        }
     }
 });
 

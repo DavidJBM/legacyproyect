@@ -46,19 +46,41 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto model)
     {
-        var user = await _userRepository.GetByUsernameAsync(model.Username);
-        
-        if (user == null || !BC.Verify(model.Password, user.PasswordHash))
-            return Unauthorized("Usuario o contraseña incorrectos.");
+        Console.WriteLine($"[LOGIN DEBUG] Starting login for user: {model.Username}");
+        try 
+        {
+            var user = await _userRepository.GetByUsernameAsync(model.Username);
+            
+            if (user == null)
+            {
+                Console.WriteLine($"[LOGIN DEBUG] User not found: {model.Username}");
+                return Unauthorized("Usuario o contraseña incorrectos.");
+            }
 
-        var token = GenerateJwtToken(user);
+            Console.WriteLine($"[LOGIN DEBUG] User found. Verifying password...");
+            if (!BC.Verify(model.Password, user.PasswordHash))
+            {
+                Console.WriteLine($"[LOGIN DEBUG] Password verification failed for: {model.Username}");
+                return Unauthorized("Usuario o contraseña incorrectos.");
+            }
 
-        return Ok(new 
-        { 
-            token, 
-            username = user.Username, 
-            userId = user.Id 
-        });
+            Console.WriteLine($"[LOGIN DEBUG] Password verified. Generating token...");
+            var token = GenerateJwtToken(user);
+
+            Console.WriteLine($"[LOGIN DEBUG] Token generated successfully for: {model.Username}");
+            return Ok(new 
+            { 
+                token, 
+                username = user.Username, 
+                userId = user.Id 
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[LOGIN DEBUG] EXCEPTION during login: {ex.Message}");
+            Console.WriteLine($"[LOGIN DEBUG] STACK TRACE: {ex.StackTrace}");
+            throw; // Re-throw to be caught by global exception handler
+        }
     }
 
     private string GenerateJwtToken(User user)
