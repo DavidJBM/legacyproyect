@@ -26,6 +26,7 @@ import { KanbanTaskCard } from "./KanbanTaskCard";
 interface KanbanBoardProps {
     tasks: TaskItem[];
     onRefresh: () => void;
+    onEditTask?: (task: TaskItem) => void;
 }
 
 export type ColumnId = "Nueva" | "En Progreso" | "Completada";
@@ -36,7 +37,7 @@ const COLUMNS: { id: ColumnId; title: string; color: string }[] = [
     { id: "Completada", title: "Finalizado", color: "bg-emerald-100" },
 ];
 
-export function KanbanBoard({ tasks, onRefresh }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onRefresh, onEditTask }: KanbanBoardProps) {
     // Only update local state when tasks change from prop (server sync)
     // AND allow local optimistic updates without flickering
     const [items, setItems] = useState<Record<ColumnId, TaskItem[]>>({
@@ -207,6 +208,7 @@ export function KanbanBoard({ tasks, onRefresh }: KanbanBoardProps) {
                         tasks={items[col.id]}
                         color={col.color}
                         onDeleteTask={handleDeleteTask}
+                        onEditTask={onEditTask}
                     />
                 ))}
 

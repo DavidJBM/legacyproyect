@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { searchTasks, getProjects } from "@/lib/api";
+import { searchTasks, getProjects, getTaskById } from "@/lib/api";
 import type { TaskItem } from "@/types/task";
 import type { ProjectItem } from "@/types/project";
 
 export function SearchSection() {
+  const [searchId, setSearchId] = useState("");
   const [searchText, setSearchText] = useState("");
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
@@ -19,7 +20,7 @@ export function SearchSection() {
     try {
       const data = await getProjects();
       setProjects(data);
-    } catch (_) {}
+    } catch (_) { }
   };
 
   useEffect(() => {
@@ -31,15 +32,21 @@ export function SearchSection() {
     setLoading(true);
     setError(null);
     try {
-      const data = await searchTasks({
-        search: searchText.trim() || undefined,
-        status: status || undefined,
-        priority: priority || undefined,
-        projectId: projectId || undefined,
-      });
-      setResults(data);
+      if (searchId.trim()) {
+        const task = await getTaskById(searchId.trim());
+        setResults([task]);
+      } else {
+        const data = await searchTasks({
+          search: searchText.trim() || undefined,
+          status: status || undefined,
+          priority: priority || undefined,
+          projectId: projectId || undefined,
+        });
+        setResults(data);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al buscar");
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -52,12 +59,23 @@ export function SearchSection() {
         {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
         <form onSubmit={handleSearch} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
           <div>
+            <label htmlFor="searchId" className="block text-sm font-medium text-slate-700">Buscar por ID</label>
+            <input
+              id="searchId"
+              type="text"
+              value={searchId}
+              onChange={(e) => { setSearchId(e.target.value); if (e.target.value) { setSearchText(""); setStatus(""); setPriority(""); setProjectId(""); } }}
+              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              placeholder="Ej: 123"
+            />
+          </div>
+          <div>
             <label htmlFor="searchText" className="block text-sm font-medium text-slate-700">Texto</label>
             <input
               id="searchText"
               type="text"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) => { setSearchText(e.target.value); if (e.target.value) setSearchId(""); }}
               className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
               placeholder="Título o descripción"
             />
@@ -71,7 +89,7 @@ export function SearchSection() {
               className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
             >
               <option value="">Todos</option>
-              <option>Pendiente</option>
+              <option>Nueva</option>
               <option>En Progreso</option>
               <option>Completada</option>
               <option>Bloqueada</option>
@@ -133,7 +151,7 @@ export function SearchSection() {
               <tr key={t.id} className="hover:bg-slate-50">
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{t.id}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{t.title}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{t.status || "Pendiente"}</td>
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{t.status || "Nueva"}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{t.priority || "Media"}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{t.projectId ? (projects.find((p) => p.id === t.projectId)?.name ?? t.projectId) : "—"}</td>
               </tr>

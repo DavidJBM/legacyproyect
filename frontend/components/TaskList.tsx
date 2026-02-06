@@ -7,6 +7,7 @@ import type { TaskItem } from "@/types/task";
 interface TaskListProps {
   tasks: TaskItem[];
   onRefresh: () => void;
+  onEditTask?: (task: TaskItem) => void;
 }
 
 /**
@@ -16,7 +17,7 @@ interface TaskListProps {
 import { Trash2, Edit2, Calendar } from "lucide-react";
 import { clsx } from "clsx";
 
-export function TaskList({ tasks, onRefresh }: TaskListProps) {
+export function TaskList({ tasks, onRefresh, onEditTask }: TaskListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -88,7 +89,7 @@ export function TaskList({ tasks, onRefresh }: TaskListProps) {
                 <td className="px-6 py-4">
                   <div className="flex justify-center">
                     <span className={clsx("px-2.5 py-1 rounded-lg text-[10px] font-bold border", statusStyle(task.status))}>
-                      {task.status || "Pendiente"}
+                      {task.status || "Nueva"}
                     </span>
                   </div>
                 </td>
@@ -108,7 +109,10 @@ export function TaskList({ tasks, onRefresh }: TaskListProps) {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
+                    <button
+                      onClick={() => onEditTask?.(task)}
+                      className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
+                    >
                       <Edit2 size={16} />
                     </button>
                     <button

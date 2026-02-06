@@ -48,8 +48,7 @@ export function KanbanTaskCard({ task, isDragging, onDelete, onEdit }: KanbanTas
 
     const handleEdit = (e: React.MouseEvent) => {
         e.stopPropagation();
-        // Implementar lógica de edición futura o modal
-        alert("Función de edición rápida próximamente");
+        onEdit?.(task);
         setShowMenu(false);
     };
 

@@ -6,7 +6,7 @@ import { Sidebar, type TabId } from "@/components/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { TaskList } from "@/components/TaskList";
-import { TaskCreateForm } from "@/components/TaskCreateForm";
+import { TaskCreateForm as TaskForm } from "@/components/TaskCreateForm";
 import { ProjectsList } from "@/components/ProjectsList";
 import { ProjectForm } from "@/components/ProjectForm";
 import { CommentsSection } from "@/components/CommentsSection";
@@ -14,6 +14,7 @@ import { HistorySection } from "@/components/HistorySection";
 import { NotificationsSection } from "@/components/NotificationsSection";
 import { SearchSection } from "@/components/SearchSection";
 import { ReportsSection } from "@/components/ReportsSection";
+import { X } from "lucide-react";
 import { getTasks, getProjects } from "@/lib/api";
 import type { TaskItem } from "@/types/task";
 import type { ProjectItem } from "@/types/project";
@@ -29,6 +30,7 @@ export default function DashboardPage() {
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string>("1");
   const [username, setUsername] = useState<string>("Usuario");
+  const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -129,7 +131,7 @@ export default function DashboardPage() {
               )}
 
               {activeTab === "kanban" && (
-                <KanbanBoard tasks={tasks} onRefresh={refreshTasks} />
+                <KanbanBoard tasks={tasks} onRefresh={refreshTasks} onEditTask={setEditingTask} />
               )}
 
               {activeTab === "tasks" && (
@@ -141,13 +143,13 @@ export default function DashboardPage() {
                     {loadingTasks ? (
                       <div className="glass-card p-12 text-center text-slate-400">Cargando...</div>
                     ) : (
-                      <TaskList tasks={tasks} onRefresh={refreshTasks} />
+                      <TaskList tasks={tasks} onRefresh={refreshTasks} onEditTask={setEditingTask} />
                     )}
                   </section>
                   <section className="space-y-4">
                     <h2 className="text-lg font-semibold text-slate-800">Nueva Tarea</h2>
                     <div className="glass-card p-6">
-                      <TaskCreateForm onCreated={refreshTasks} currentUserId={currentUserId} />
+                      <TaskForm onSuccess={refreshTasks} currentUserId={currentUserId} />
                     </div>
                   </section>
                 </div>
@@ -227,6 +229,44 @@ export default function DashboardPage() {
           </AnimatePresence>
         </div>
       </main>
+
+      <AnimatePresence>
+        {editingTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingTask(null)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 className="text-lg font-bold text-slate-800 tracking-tight">Editar Tarea</h3>
+                <button
+                  onClick={() => setEditingTask(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6">
+                <TaskForm
+                  currentUserId={currentUserId}
+                  initialTask={editingTask}
+                  onSuccess={() => { refreshTasks(); setEditingTask(null); }}
+                  onCancel={() => setEditingTask(null)}
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -83,19 +83,34 @@ export function ReportsSection() {
         <h3 className="mb-4 text-lg font-medium text-slate-700">Resultado del reporte</h3>
         {loading && <p className="text-slate-500">Cargando...</p>}
         {!loading && reportType === "tasks" && tasksReport && (
-          <pre className="whitespace-pre-wrap text-sm text-slate-800 font-sans">
-            {Object.entries(tasksReport).map(([status, count]) => `${status}: ${count} tareas`).join("\n")}
-          </pre>
+          <div className="space-y-2">
+            {Object.entries(tasksReport).map(([status, count]) => (
+              <div key={status} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 border border-slate-100">
+                <span className="font-medium text-slate-700">{status}</span>
+                <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-bold">{count} tareas</span>
+              </div>
+            ))}
+          </div>
         )}
         {!loading && reportType === "projects" && projectsReport && (
-          <pre className="whitespace-pre-wrap text-sm text-slate-800 font-sans">
-            {projectsReport.map((p) => `${p.projectName}: ${p.taskCount} tareas`).join("\n")}
-          </pre>
+          <div className="space-y-2">
+            {projectsReport.map((p) => (
+              <div key={p.projectName} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 border border-slate-100">
+                <span className="font-medium text-slate-700">{p.projectName}</span>
+                <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-bold">{p.taskCount} tareas</span>
+              </div>
+            ))}
+          </div>
         )}
         {!loading && reportType === "users" && usersReport && (
-          <pre className="whitespace-pre-wrap text-sm text-slate-800 font-sans">
-            {usersReport.map((u) => `Usuario ${u.userId}: ${u.taskCount} tareas asignadas`).join("\n")}
-          </pre>
+          <div className="space-y-2">
+            {usersReport.map((u) => (
+              <div key={u.userId} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 border border-slate-100">
+                <span className="font-medium text-slate-700">Usuario ID: {u.userId}</span>
+                <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-xs font-bold">{u.taskCount} tareas</span>
+              </div>
+            ))}
+          </div>
         )}
         {!loading && !reportType && !tasksReport && !projectsReport && !usersReport && (
           <p className="text-slate-500">Selecciona un tipo de reporte o exporta a CSV.</p>

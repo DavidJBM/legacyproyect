@@ -1,27 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { createTask } from "@/lib/api";
-import type { CreateTaskRequest } from "@/types/task";
+import { useState, useEffect } from "react";
+import { createTask, updateTask } from "@/lib/api";
+import type { TaskItem, CreateTaskRequest } from "@/types/task";
 
 interface TaskCreateFormProps {
-  onCreated: () => void;
+  onSuccess: () => void;
   currentUserId: string;
+  initialTask?: TaskItem | null;
+  onCancel?: () => void;
 }
 
 /**
- * Componente separado para el formulario de creación de tareas.
- * Equivalente conceptual al formulario "Nueva/Editar Tarea" + addTask() en app.js / index.html.
+ * Componente para crear o editar tareas.
  */
-export function TaskCreateForm({ onCreated, currentUserId }: TaskCreateFormProps) {
+export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTask: task, onCancel }: TaskCreateFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("Pendiente");
+  const [status, setStatus] = useState("Nueva");
   const [priority, setPriority] = useState("Media");
   const [dueDate, setDueDate] = useState("");
   const [estimatedHours, setEstimatedHours] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title || "");
+      setDescription(task.description || "");
+      setStatus(task.status || "Nueva");
+      setPriority(task.priority || "Media");
+      setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
+      setEstimatedHours(task.estimatedHours?.toString() || "");
+    } else {
+      resetForm();
+    }
+  }, [task]);
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setStatus("Nueva");
+    setPriority("Media");
+    setDueDate("");
+    setEstimatedHours("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +62,21 @@ export function TaskCreateForm({ onCreated, currentUserId }: TaskCreateFormProps
         priority,
         dueDate: dueDate || undefined,
         estimatedHours: estimatedHours ? parseFloat(estimatedHours) : 0,
-        createdByUserId: currentUserId,
+        createdByUserId: task ? task.createdByUserId : currentUserId,
+        assignedToUserId: task?.assignedToUserId,
+        projectId: task?.projectId,
       };
-      await createTask(request);
-      setTitle("");
-      setDescription("");
-      setStatus("Pendiente");
-      setPriority("Media");
-      setDueDate("");
-      setEstimatedHours("");
+
+      if (task) {
+        await updateTask(task.id, request);
+      } else {
+        await createTask(request);
+      }
+
+      resetForm();
       onCreated();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al crear tarea");
+      setError(e instanceof Error ? e.message : "Error al procesar tarea");
     } finally {
       setSubmitting(false);
     }
@@ -61,6 +87,10 @@ export function TaskCreateForm({ onCreated, currentUserId }: TaskCreateFormProps
       onSubmit={handleSubmit}
       className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
     >
+      <h3 className="text-lg font-bold text-slate-800 mb-4">
+        {task ? "Editar Tarea" : "Nueva Tarea"}
+      </h3>
+
       {error && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           {error}
@@ -116,7 +146,7 @@ export function TaskCreateForm({ onCreated, currentUserId }: TaskCreateFormProps
               onChange={(e) => setStatus(e.target.value)}
               className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             >
-              <option>Pendiente</option>
+              <option>Nueva</option>
               <option>En Progreso</option>
               <option>Completada</option>
               <option>Bloqueada</option>
@@ -144,48 +174,61 @@ export function TaskCreateForm({ onCreated, currentUserId }: TaskCreateFormProps
           </div>
         </div>
 
-        <div>
-          <label
-            htmlFor="taskDueDate"
-            className="block text-sm font-medium text-slate-700"
-          >
-            Fecha de vencimiento
-          </label>
-          <input
-            id="taskDueDate"
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              htmlFor="taskDueDate"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Vencimiento
+            </label>
+            <input
+              id="taskDueDate"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="taskHours"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Horas
+            </label>
+            <input
+              id="taskHours"
+              type="number"
+              step="0.5"
+              min="0"
+              value={estimatedHours}
+              onChange={(e) => setEstimatedHours(e.target.value)}
+              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              placeholder="0"
+            />
+          </div>
         </div>
 
-        <div>
-          <label
-            htmlFor="taskHours"
-            className="block text-sm font-medium text-slate-700"
+        <div className="flex gap-3 pt-2">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+            >
+              Cancelar
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 rounded-lg bg-primary-600 px-4 py-2.5 font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            Horas estimadas
-          </label>
-          <input
-            id="taskHours"
-            type="number"
-            step="0.5"
-            min="0"
-            value={estimatedHours}
-            onChange={(e) => setEstimatedHours(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            placeholder="0"
-          />
+            {submitting ? "Guardando..." : task ? "Guardar Cambios" : "Crear Tarea"}
+          </button>
         </div>
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-primary-600 px-4 py-2.5 font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
-        >
-          {submitting ? "Creando..." : "Crear tarea"}
-        </button>
       </div>
     </form>
   );

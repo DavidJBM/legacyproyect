@@ -33,6 +33,15 @@ export async function getTasks(): Promise<TaskItem[]> {
   return res.json();
 }
 
+export async function getTaskById(id: string): Promise<TaskItem> {
+  const res = await fetch(url(`/Tasks/${id}`), {
+    cache: "no-store",
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error("Tarea no encontrada");
+  return res.json();
+}
+
 export async function searchTasks(params: { search?: string; status?: string; priority?: string; projectId?: string }): Promise<TaskItem[]> {
   const q = new URLSearchParams();
   if (params.search) q.set("search", params.search);
