@@ -153,7 +153,7 @@ export default function AuthPage() {
                                 <input
                                     type="text"
                                     required
-                                    className="input-modern pl-12"
+                                    className="input-modern pl-14"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     placeholder="ej. bustillos"
@@ -169,7 +169,7 @@ export default function AuthPage() {
                                     <input
                                         type="email"
                                         required
-                                        className="input-modern pl-12"
+                                        className="input-modern pl-14"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="correo@empresa.com"
@@ -185,7 +185,7 @@ export default function AuthPage() {
                                 <input
                                     type="password"
                                     required
-                                    className="input-modern pl-12"
+                                    className="input-modern pl-14"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
