@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { deleteTask } from "@/lib/api";
 import type { TaskItem } from "@/types/task";
+import type { ProjectItem } from "@/types/project";
 
 interface TaskListProps {
   tasks: TaskItem[];
+  projects: ProjectItem[];
   onRefresh: () => void;
   onEditTask?: (task: TaskItem) => void;
 }
@@ -17,7 +19,7 @@ interface TaskListProps {
 import { Trash2, Edit2, Calendar } from "lucide-react";
 import { clsx } from "clsx";
 
-export function TaskList({ tasks, onRefresh, onEditTask }: TaskListProps) {
+export function TaskList({ tasks, projects, onRefresh, onEditTask }: TaskListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -71,7 +73,8 @@ export function TaskList({ tasks, onRefresh, onEditTask }: TaskListProps) {
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50">
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Título y Descripción</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">Estado</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Estado</th>
+              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Proyecto</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Prioridad</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Vencimiento</th>
               <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-right">Acciones</th>
@@ -87,11 +90,16 @@ export function TaskList({ tasks, onRefresh, onEditTask }: TaskListProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex justify-center">
+                  <div className="flex justify-start">
                     <span className={clsx("px-2.5 py-1 rounded-lg text-[10px] font-bold border", statusStyle(task.status))}>
                       {task.status || "Nueva"}
                     </span>
                   </div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="text-xs font-medium text-slate-600">
+                    {task.projectId ? (projects.find(p => p.id === task.projectId)?.name || "Proyecto Desconocido") : "Sin Proyecto"}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">

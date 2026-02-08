@@ -22,9 +22,11 @@ import { TaskItem, CreateTaskRequest } from "@/types/task";
 import { updateTask, deleteTask } from "@/lib/api";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanTaskCard } from "./KanbanTaskCard";
+import type { ProjectItem } from "@/types/project";
 
 interface KanbanBoardProps {
     tasks: TaskItem[];
+    projects: ProjectItem[];
     onRefresh: () => void;
     onEditTask?: (task: TaskItem) => void;
 }
@@ -37,7 +39,7 @@ const COLUMNS: { id: ColumnId; title: string; color: string }[] = [
     { id: "Completada", title: "Finalizado", color: "bg-emerald-100" },
 ];
 
-export function KanbanBoard({ tasks, onRefresh, onEditTask }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, projects, onRefresh, onEditTask }: KanbanBoardProps) {
     // Only update local state when tasks change from prop (server sync)
     // AND allow local optimistic updates without flickering
     const [items, setItems] = useState<Record<ColumnId, TaskItem[]>>({
@@ -206,6 +208,7 @@ export function KanbanBoard({ tasks, onRefresh, onEditTask }: KanbanBoardProps) 
                         id={col.id}
                         title={col.title}
                         tasks={items[col.id]}
+                        projects={projects}
                         color={col.color}
                         onDeleteTask={handleDeleteTask}
                         onEditTask={onEditTask}
@@ -222,7 +225,7 @@ export function KanbanBoard({ tasks, onRefresh, onEditTask }: KanbanBoardProps) 
                     }),
                 }}>
                     {activeTask ? (
-                        <KanbanTaskCard task={activeTask} isDragging />
+                        <KanbanTaskCard task={activeTask} projects={projects} isDragging />
                     ) : null}
                 </DragOverlay>
             </DndContext>

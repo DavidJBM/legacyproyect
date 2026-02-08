@@ -131,7 +131,7 @@ export default function DashboardPage() {
               )}
 
               {activeTab === "kanban" && (
-                <KanbanBoard tasks={tasks} onRefresh={refreshTasks} onEditTask={setEditingTask} />
+                <KanbanBoard tasks={tasks} projects={projects} onRefresh={refreshTasks} onEditTask={setEditingTask} />
               )}
 
               {activeTab === "tasks" && (
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                     {loadingTasks ? (
                       <div className="glass-card p-12 text-center text-slate-400">Cargando...</div>
                     ) : (
-                      <TaskList tasks={tasks} onRefresh={refreshTasks} onEditTask={setEditingTask} />
+                      <TaskList tasks={tasks} projects={projects} onRefresh={refreshTasks} onEditTask={setEditingTask} />
                     )}
                   </section>
                   <section className="space-y-4">

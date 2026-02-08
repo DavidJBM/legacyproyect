@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createTask, updateTask } from "@/lib/api";
+import { createTask, updateTask, getProjects } from "@/lib/api";
 import type { TaskItem, CreateTaskRequest } from "@/types/task";
+import type { ProjectItem } from "@/types/project";
 
 interface TaskCreateFormProps {
   onSuccess: () => void;
@@ -12,7 +13,7 @@ interface TaskCreateFormProps {
 }
 
 /**
- * Componente para crear o editar tareas.
+ * Componente para crear o editar tareas con relación a proyectos.
  */
 export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTask: task, onCancel }: TaskCreateFormProps) {
   const [title, setTitle] = useState("");
@@ -21,6 +22,8 @@ export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTas
   const [priority, setPriority] = useState("Media");
   const [dueDate, setDueDate] = useState("");
   const [estimatedHours, setEstimatedHours] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,10 +35,23 @@ export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTas
       setPriority(task.priority || "Media");
       setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
       setEstimatedHours(task.estimatedHours?.toString() || "");
+      setProjectId(task.projectId || "");
     } else {
       resetForm();
     }
   }, [task]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await getProjects();
+        setProjects(data);
+      } catch (err) {
+        console.error("Error fetching projects", err);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   const resetForm = () => {
     setTitle("");
@@ -44,6 +60,7 @@ export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTas
     setPriority("Media");
     setDueDate("");
     setEstimatedHours("");
+    setProjectId("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +81,7 @@ export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTas
         estimatedHours: estimatedHours ? parseFloat(estimatedHours) : 0,
         createdByUserId: task ? task.createdByUserId : currentUserId,
         assignedToUserId: task?.assignedToUserId,
-        projectId: task?.projectId,
+        projectId: projectId || undefined,
       };
 
       if (task) {
@@ -209,6 +226,26 @@ export function TaskCreateForm({ onSuccess: onCreated, currentUserId, initialTas
               placeholder="0"
             />
           </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="taskProject"
+            className="block text-sm font-medium text-slate-700"
+          >
+            Proyecto Relacionado
+          </label>
+          <select
+            id="taskProject"
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          >
+            <option value="">Seleccionar Proyecto (Opcional)</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="flex gap-3 pt-2">

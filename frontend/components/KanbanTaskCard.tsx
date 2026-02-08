@@ -3,19 +3,21 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TaskItem } from "@/types/task";
-import { Calendar, MoreHorizontal, User, Trash2, Edit2 } from "lucide-react";
+import { ProjectItem } from "@/types/project";
+import { Calendar, MoreHorizontal, User, Trash2, Edit2, Folder } from "lucide-react";
 import { clsx } from "clsx";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface KanbanTaskCardProps {
     task: TaskItem;
+    projects: ProjectItem[];
     isDragging?: boolean;
     onDelete?: (id: string) => void;
     onEdit?: (task: TaskItem) => void;
 }
 
-export function KanbanTaskCard({ task, isDragging, onDelete, onEdit }: KanbanTaskCardProps) {
+export function KanbanTaskCard({ task, projects, isDragging, onDelete, onEdit }: KanbanTaskCardProps) {
     const [showMenu, setShowMenu] = useState(false);
 
     const {
@@ -108,9 +110,16 @@ export function KanbanTaskCard({ task, isDragging, onDelete, onEdit }: KanbanTas
             <h4 className="text-sm font-semibold text-slate-800 mb-1 line-clamp-2 leading-tight">
                 {task.title}
             </h4>
-            <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-snug">
+            <p className="text-xs text-slate-500 mb-2 line-clamp-2 leading-snug">
                 {task.description}
             </p>
+
+            <div className="flex items-center gap-1.5 mb-4 px-2 py-1 rounded-md bg-slate-50 border border-slate-100 w-fit">
+                <Folder size={12} className="text-slate-400" />
+                <span className="text-[10px] font-medium text-slate-600">
+                    {task.projectId ? (projects.find(p => p.id === task.projectId)?.name || "Proyecto Desconocido") : "Sin Proyecto"}
+                </span>
+            </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-slate-100 font-medium">
                 <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
@@ -124,6 +133,6 @@ export function KanbanTaskCard({ task, isDragging, onDelete, onEdit }: KanbanTas
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

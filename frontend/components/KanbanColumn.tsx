@@ -6,6 +6,7 @@ import {
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { TaskItem } from "@/types/task";
+import { ProjectItem } from "@/types/project";
 import { KanbanTaskCard } from "./KanbanTaskCard";
 import { motion } from "framer-motion";
 
@@ -13,12 +14,13 @@ interface KanbanColumnProps {
     id: string;
     title: string;
     tasks: TaskItem[];
+    projects: ProjectItem[];
     color: string;
     onDeleteTask?: (id: string) => void;
     onEditTask?: (task: TaskItem) => void;
 }
 
-export function KanbanColumn({ id, title, tasks, color, onDeleteTask, onEditTask }: KanbanColumnProps) {
+export function KanbanColumn({ id, title, tasks, projects, color, onDeleteTask, onEditTask }: KanbanColumnProps) {
     const { setNodeRef } = useDroppable({
         id,
     });
@@ -45,6 +47,7 @@ export function KanbanColumn({ id, title, tasks, color, onDeleteTask, onEditTask
                             <KanbanTaskCard
                                 key={task.id}
                                 task={task}
+                                projects={projects}
                                 onDelete={onDeleteTask}
                                 onEdit={onEditTask}
                             />
