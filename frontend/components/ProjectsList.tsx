@@ -83,10 +83,6 @@ export function ProjectsList({ projects, onRefresh, onSelect, selectedId }: Proj
               <Users size={14} />
               <span>EQUIPO</span>
             </div>
-            <div className="flex items-center gap-1 text-primary-600 text-sm font-bold">
-              Ver detalles
-              <ChevronRight size={16} />
-            </div>
           </div>
 
           {selectedId === p.id && (
