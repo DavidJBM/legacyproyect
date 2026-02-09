@@ -208,6 +208,14 @@ export async function getReportUsers(): Promise<{ userId: string; taskCount: num
   return res.json();
 }
 
+export async function exportReportCsv(): Promise<Blob> {
+  const res = await fetch(url("/Reports/export/csv"), {
+    headers: getHeaders()
+  });
+  if (!res.ok) throw new Error("Error al exportar CSV");
+  return res.blob();
+}
+
 export function getExportCsvUrl(): string {
   return url("/Reports/export/csv");
 }

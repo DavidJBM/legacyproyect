@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getReportTasks, getReportProjects, getReportUsers, getExportCsvUrl } from "@/lib/api";
+import { getReportTasks, getReportProjects, getReportUsers, exportReportCsv } from "@/lib/api";
 
 type ReportType = "tasks" | "projects" | "users" | null;
 
@@ -38,6 +38,21 @@ export function ReportsSection() {
     }
   };
 
+  const handleExportCsv = async () => {
+    try {
+      const blob = await exportReportCsv();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute("download", "export_tasks.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al exportar CSV");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -68,15 +83,14 @@ export function ReportsSection() {
           >
             Reporte de Usuarios
           </button>
-          <a
-            href={getExportCsvUrl()}
-            download="export_tasks.csv"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-primary-600 px-4 py-2 text-white font-medium shadow-sm hover:bg-primary-700"
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={loading}
+            className="rounded-lg bg-primary-600 px-4 py-2 text-white font-medium shadow-sm hover:bg-primary-700 disabled:opacity-50"
           >
             Exportar a CSV
-          </a>
+          </button>
         </div>
       </div>
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
