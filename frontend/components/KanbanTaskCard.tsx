@@ -61,7 +61,7 @@ export function KanbanTaskCard({ task, projects, isDragging, onDelete, onEdit }:
             {...attributes}
             {...listeners}
             className={clsx(
-                "group glass-card p-4 cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-primary-500/20 transition-all relative",
+                "group glass-card p-4 cursor-pointer hover:bg-white hover:shadow-xl hover:ring-2 hover:ring-primary-500/30 transition-all relative",
                 isDragging || isSortableDragging ? "opacity-40" : "opacity-100"
             )}
             onMouseLeave={() => setShowMenu(false)}
