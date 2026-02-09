@@ -41,13 +41,18 @@ export function ReportsSection() {
   const handleExportCsv = async () => {
     try {
       const blob = await exportReportCsv();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      // Add UTF-8 BOM to fix accent display in Excel/Windows
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blobWithBom = new Blob([bom, blob], { type: "text/csv;charset=utf-8" });
+
+      const downloadUrl = window.URL.createObjectURL(blobWithBom);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.setAttribute("download", "export_tasks.csv");
+      link.setAttribute("download", `reporte_tareas_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al exportar CSV");
     }

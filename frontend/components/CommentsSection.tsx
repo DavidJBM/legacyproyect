@@ -1,20 +1,47 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getCommentsByTaskId, addComment } from "@/lib/api";
+import { getCommentsByTaskId, addComment, getProjects, getTasks } from "@/lib/api";
 import type { CommentItem, AddCommentRequest } from "@/types/comment";
+import type { ProjectItem } from "@/types/project";
+import type { TaskItem } from "@/types/task";
 
 interface CommentsSectionProps {
   currentUserId: string;
 }
 
 export function CommentsSection({ currentUserId }: CommentsSectionProps) {
+  const [projectId, setProjectId] = useState("");
   const [taskId, setTaskId] = useState("");
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<TaskItem[]>([]);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadInitialData = async () => {
+    try {
+      const [pData, tData] = await Promise.all([getProjects(), getTasks()]);
+      setProjects(pData);
+      setTasks(tData);
+      setFilteredTasks(tData);
+    } catch (_) { }
+  };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (projectId) {
+      setFilteredTasks(tasks.filter(t => t.projectId === projectId));
+    } else {
+      setFilteredTasks(tasks);
+    }
+  }, [projectId, tasks]);
 
   const loadComments = async () => {
     if (!taskId.trim()) return;
@@ -59,16 +86,33 @@ export function CommentsSection({ currentUserId }: CommentsSectionProps) {
         <h3 className="mb-4 text-lg font-medium text-slate-700">Comentarios por tarea</h3>
         {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
         <div className="flex gap-4 flex-wrap items-end">
-          <div>
-            <label htmlFor="commentTaskId" className="block text-sm font-medium text-slate-700">ID Tarea</label>
-            <input
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="commentProject" className="block text-sm font-medium text-slate-700">Proyecto</label>
+            <select
+              id="commentProject"
+              value={projectId}
+              onChange={(e) => { setProjectId(e.target.value); setTaskId(""); }}
+              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            >
+              <option value="">Todos los proyectos</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <label htmlFor="commentTaskId" className="block text-sm font-medium text-slate-700">Tarea</label>
+            <select
               id="commentTaskId"
-              type="text"
               value={taskId}
               onChange={(e) => setTaskId(e.target.value)}
-              placeholder="ID de la tarea"
-              className="mt-1 block w-40 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-            />
+              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            >
+              <option value="">Selecciona una tarea</option>
+              {filteredTasks.map(t => (
+                <option key={t.id} value={t.id}>{t.title}</option>
+              ))}
+            </select>
           </div>
           <button
             type="button"

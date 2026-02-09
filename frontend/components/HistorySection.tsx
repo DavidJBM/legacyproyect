@@ -1,29 +1,42 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getHistoryByTaskId, getAllHistory, getProjects } from "@/lib/api";
+import { getHistoryByTaskId, getAllHistory, getProjects, getTasks } from "@/lib/api";
 import type { HistoryEntryItem } from "@/types/history";
 import type { ProjectItem } from "@/types/project";
+import type { TaskItem } from "@/types/task";
 
 export function HistorySection() {
   const [taskId, setTaskId] = useState("");
   const [projectId, setProjectId] = useState("");
   const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<TaskItem[]>([]);
   const [history, setHistory] = useState<HistoryEntryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProjects = async () => {
+  const loadInitialData = async () => {
     try {
-      const data = await getProjects();
-      setProjects(data);
+      const [pData, tData] = await Promise.all([getProjects(), getTasks()]);
+      setProjects(pData);
+      setTasks(tData);
+      setFilteredTasks(tData);
     } catch (_) { }
   };
 
   useEffect(() => {
-    loadProjects();
+    loadInitialData();
   }, []);
+
+  useEffect(() => {
+    if (projectId) {
+      setFilteredTasks(tasks.filter(t => t.projectId === projectId));
+    } else {
+      setFilteredTasks(tasks);
+    }
+  }, [projectId, tasks]);
 
   const loadByTask = async () => {
     if (!taskId.trim()) return;
@@ -85,15 +98,18 @@ export function HistorySection() {
             </select>
           </div>
           <div>
-            <label htmlFor="historyTaskId" className="block text-sm font-medium text-slate-700">ID Tarea (Directo)</label>
-            <input
+            <label htmlFor="historyTaskId" className="block text-sm font-medium text-slate-700">Tarea</label>
+            <select
               id="historyTaskId"
-              type="text"
               value={taskId}
-              onChange={(e) => { setTaskId(e.target.value); setProjectId(""); setViewAll(false); }}
-              placeholder="Ej: 101"
-              className="mt-1 block w-40 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-            />
+              onChange={(e) => { setTaskId(e.target.value); setViewAll(false); }}
+              className="mt-1 block w-64 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            >
+              <option value="">Selecciona una tarea</option>
+              {filteredTasks.map(t => (
+                <option key={t.id} value={t.id}>{t.title} (ID: {t.id})</option>
+              ))}
+            </select>
           </div>
           <button
             type="button"
