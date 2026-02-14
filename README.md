@@ -1,54 +1,75 @@
-# Task Manager Simple - Versión JavaScript
+# Task Manager - Project Evolution
 
-Sistema de gestión de tareas simplificado en JavaScript plano, HTML básico y CSS mínimo. Usa localStorage como base de datos, sin necesidad de servidor ni configuración.
+Este repositorio contiene la evolución de un sistema de gestión de tareas, desde una implementación simple monolítica hasta una arquitectura moderna distribuida y escalable.
 
-## Características
+---
 
-- **Sin dependencias**: Solo HTML, CSS y JavaScript puro
-- **Sin servidor**: Funciona completamente en el navegador
-- **Almacenamiento local**: Usa localStorage del navegador
-- **Apariencia antigua**: Diseño minimalista estilo legacy
-- **Funcionalidades completas**: Todas las características del sistema original
+## 🏗️ Arquitectura del Proyecto
 
-## Funcionalidades
+El proyecto se divide en dos etapas principales:
 
-1. **Autenticación**: Login básico con múltiples usuarios
-2. **CRUD de Tareas**: Crear, leer, actualizar y eliminar tareas
-3. **CRUD de Proyectos**: Gestión de proyectos
-4. **Sistema de Comentarios**: Comentarios en tareas
-5. **Historial y Auditoría**: Registro de cambios
-6. **Notificaciones**: Sistema de notificaciones por usuario
-7. **Búsqueda Avanzada**: Búsqueda con múltiples filtros
-8. **Generación de Reportes**: Reportes de tareas, proyectos y usuarios
-9. **Exportación CSV**: Exportar datos a CSV
+### 1. Sistema Legacy (Vanilla JS)
+Una **Single Page Application (SPA)** minimalista diseñada para funcionar sin dependencias externas ni servidor.
+- **Ubicación:** Raíz del proyecto.
+- **Frontend:** HTML5, CSS3 y JavaScript puro.
+- **Persistencia:** `localStorage` del navegador.
+- **Uso:** Abrir `index.html` directamente en el navegador.
 
-## Uso
+### 2. Sistema Moderno (Full Stack)
+Una transición hacia una arquitectura profesional y escalable siguiendo principios de **Clean Architecture**.
 
-1. Abre `index.html` en cualquier navegador moderno
-2. Usa las credenciales por defecto:
-   - Usuario: `admin`
-   - Contraseña: `admin`
-3. Explora las diferentes pestañas para usar las funcionalidades
+#### 🖥️ Frontend (Next.js)
+Ubicado en la carpeta [`frontend`](./frontend).
+- **Stack:** Next.js 14 (App Router), TypeScript, Tailwind CSS.
+- **Interactividad:** Kanban board avanzado con Drag & Drop (`@dnd-kit`), animaciones con Framer Motion y componentes responsivos.
+- **Ejecución:**
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
 
-## Estructura
+#### ⚙️ Backend (.NET 10)
+Ubicado en la carpeta [`backend`](./backend).
+- **Stack:** .NET 10 Web API.
+- **Arquitectura:** Clean Architecture (Domain, Application, Infrastructure, API).
+- **Persistencia:** Integración con MongoDB.
+- **Ejecución:**
+  ```bash
+  cd backend
+  dotnet restore
+  dotnet run --project src/TaskManager.Api
+  ```
+
+---
+
+## 📂 Estructura de Directorios
 
 ```
-TaskManagerSimple/
-├── index.html    # Interfaz HTML básica
-├── style.css     # Estilos CSS mínimos (apariencia antigua)
-├── app.js        # Lógica JavaScript con localStorage
-└── README.md     # Este archivo
+legacyproyect/
+├── backend/            # API en .NET 10 (Clean Architecture)
+├── frontend/           # Aplicación Next.js 14 + TS + Tailwind
+├── MongoTest/          # Scripts de prueba para base de datos
+├── ARCHITECTURE_ANALYSIS.md # Análisis detallado de la migración
+├── index.html          # Punto de entrada versión Legacy
+├── app.js              # Lógica versión Legacy
+├── style.css           # Estilos versión Legacy
+└── README.md           # Este archivo
 ```
 
-## Datos por Defecto
+---
 
-El sistema se inicializa con:
-- **Usuarios**: admin/admin, user1/user1, user2/user2
-- **Proyectos**: Proyecto Demo, Proyecto Alpha, Proyecto Beta
+## 🚀 Características Principales
 
-## Notas
+- **Gestión de Tareas:** CRUD completo con estados, prioridades y asignaciones.
+- **Tablero Kanban:** Interfaz interactiva de arrastrar y soltar para flujo de trabajo.
+- **Proyectos:** Organización de tareas por proyectos específicos.
+- **Personalización:** Soporte para temas (Dark Mode) y diseño premium.
+- **Seguridad:** Transición de login básico a autenticación robusta gestionada por el backend.
 
-- Todos los datos se guardan en localStorage del navegador
-- Los datos persisten entre sesiones
-- Para limpiar los datos, usa la consola del navegador: `localStorage.clear()`
-- Compatible con cualquier navegador moderno (Chrome, Firefox, Safari, Edge)
+---
+
+## 📄 Documentación Adicional
+
+Para un análisis técnico profundo sobre las decisiones arquitectónicas y la comparativa entre el sistema legacy y el moderno, consulta:
+👉 [ARCHITECTURE_ANALYSIS.md](./ARCHITECTURE_ANALYSIS.md)
